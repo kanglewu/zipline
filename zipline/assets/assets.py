@@ -26,7 +26,6 @@ from six import with_metaclass, string_types
 
 from zipline.errors import (
     ConsumeAssetMetaDataError,
-    IdentifierNotFound,
     InvalidAssetType,
     MultipleSymbolsFound,
     SidAssignmentError,
@@ -70,7 +69,6 @@ class AssetFinder(object):
         # our instance will continue to use the old one.
         self.cache = {}
         self.sym_cache = {}
-        self.identifier_cache = {}
         self.fuzzy_match = {}
 
         # This flag controls if the AssetFinder is allowed to generate its own
@@ -109,15 +107,6 @@ class AssetFinder(object):
             return None
         else:
             raise SidNotFound(sid=sid)
-
-    def retrieve_asset_by_identifier(self, identifier):
-        if isinstance(identifier, Asset):
-            return identifier
-        asset = self.identifier_cache.get(identifier)
-        if asset is not None:
-            return asset
-        else:
-            raise IdentifierNotFound(identifier=identifier)
 
     @staticmethod
     def _lookup_symbol_in_infos(infos, as_of_date):
@@ -242,7 +231,6 @@ class AssetFinder(object):
         # Wipe caches before repopulating
         self.cache = {}
         self.sym_cache = {}
-        self.identifier_cache = {}
         self.fuzzy_match = {}
 
         counter = 0
@@ -335,7 +323,6 @@ class AssetFinder(object):
             raise InvalidAssetType(asset_type=asset_type)
 
         self.cache[asset.sid] = asset
-        self.identifier_cache[identifier] = asset
         if asset.symbol is not '':
             self.sym_cache.setdefault(asset.symbol, []).append(asset)
 
